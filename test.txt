@@ -1,8 +1,10 @@
 A B C
-a b c
+a b c d e f
 A -> B C
 B -> a
 B -> b
+B -> C
+B -> d e
 C -> c
 
 A

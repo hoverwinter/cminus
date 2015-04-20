@@ -66,6 +66,8 @@ def go(I,X):
     j = []
     for item in I:
         tmp = item[:]
+        if '.' not in item:
+            return []
         if item[item.index('.')+1] == X:
             tmp2 = tmp.index('.')
             tmp.remove('.')
@@ -73,9 +75,29 @@ def go(I,X):
             j.append(tmp)
     return getClosure(j)
 
+def getItemSet():
+    C = [['A','->','.','B','C','#']]
+    for item in C:
+        for j in V.union(T):
+            tmp = go([item],j)
+            if len(tmp) != 0 and tmp not in C:
+                C.append(tmp)
+    return C
+
+def getAnalysisTable():
+    C = getItemSet()
+    n = len(C)
+    for i in range(n):
+        print C[i]
+    return [[],[],]
+
+def analysis():
+    pass
 
 if __name__ == '__main__':
     getGrammar()
+    print 
     # print getFirst('A')
     # print getClosure([['A','->','.','C','B','#']])
-    print go([['A','->','.','C','B','#']],'C')
+    # print go([['A','->','.','C','B','#']],'C')
+    getAnalysisTable()
