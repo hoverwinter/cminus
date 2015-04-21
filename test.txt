@@ -1,11 +1,11 @@
-A B C
-a b c d e f
-A -> B C
-B -> a
-B -> b
-B -> C
-B -> d e
-C -> c
+S' S L R
+= * i
+S' -> S
+S -> L = R
+S -> R
+L -> * R
+L -> i
+R -> L
 
-A
-cc#
+S'
+*i=*i#

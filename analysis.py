@@ -243,7 +243,7 @@ def makeTable():
 			for prod in item:
 				if prod.lookahead == '#' and prod.left == S:
 					row['#'] = 'acc'
-				elif prod.lookahead == '#':
+				elif prod.lookahead == '#' and len(prod.right) == prod.dot:
 					row['#'] = 'R'+str(product_index(prod))
 				else:
 					row['#'] = 'err'
@@ -254,7 +254,8 @@ def makeTable():
 					if t != None:
 						row[tmp] = 'S'+str(closure_index(t,states))
 					else:
-						row[tmp] = 'err'	
+						if row.get(tmp,None) == None:
+							row[tmp] = 'err'	
 		for tmp in V:
 			t = go(item,tmp)
 			if t == None:
@@ -289,17 +290,15 @@ def analysis():
 		
 		if table[s][i].find('S') != -1:
 			vt.append(i)
-			state.append(int(table[s][i][1]))
+			state.append(int(table[s][i][1:]))
 			a += 1
-
 			print 'shifting:'
 
 		elif table[s][i].find('R') != -1:
-			tmp = int(table[s][i][1])
+			tmp = int(table[s][i][1:])
 			for i in range(len(P[tmp].right)):
 				state.pop()
 				vt.pop()
-
 			print 'reducing: '+ str(P[tmp])
 
 			vt.append(P[tmp].left)
@@ -308,12 +307,12 @@ def analysis():
 			print 'ACCEPT: analysis finished!'
 			return 
 		else:
-			print 'sorry for error!'
+			print 'sorry for ERROR!'
 			return
 
 if __name__ == "__main__":
 	getGrammar()
-	print
+	print 'Product:'
 	for i in P:
 		print i
 	print
