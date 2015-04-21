@@ -247,7 +247,7 @@ def makeTable():
 					row['#'] = 'R'+str(product_index(prod))
 				else:
 					row['#'] = 'err'
-				if prod.lookahead == tmp:
+				if prod.lookahead == tmp and len(prod.right) == prod.dot:
 					row[tmp]='R'+str(product_index(prod))
 				else:
 					t = go(item,tmp)
@@ -265,6 +265,9 @@ def makeTable():
 		print row
 	return table
 
+#
+#	@function: LR analysis using table
+#
 def analysis():
 	sentence = raw_input('Sentence to analysis:')
 	print sentence
@@ -280,6 +283,10 @@ def analysis():
 		s = state[-1]
 		w = vt[-1]
 		i = sentence[a]
+
+		print 'State Stack: %s' % state
+		print 'Symbol Stack: %s' % vt
+		
 		if table[s][i].find('S') != -1:
 			vt.append(i)
 			state.append(int(table[s][i][1]))
@@ -303,9 +310,6 @@ def analysis():
 		else:
 			print 'sorry for error!'
 			return
-
-		print 'State Stack: %s' % state
-		print 'Symbol Stack: %s' % vt
 
 if __name__ == "__main__":
 	getGrammar()

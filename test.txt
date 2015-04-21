@@ -8,4 +8,4 @@ B -> d e
 C -> c
 
 A
-ac#
+cc#
