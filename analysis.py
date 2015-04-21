@@ -1,6 +1,14 @@
 #!/usr/bin/env python
 #encoding: utf-8
 
+'''
+2015-04-20
+Author: Hover Winter
+Copyright @ hoverwinter
+Email: carpela@163.com
+HIT License
+'''
+
 import re
 
 V = None
@@ -48,10 +56,10 @@ class Item():
 def getGrammar():
     global V, T, P, S
     a = raw_input('Please input the V:')
-    V = set([x for x in a.strip().split(' ')])
+    V = set([x for x in re.split('\s+',a.strip())])
 
     a = raw_input('Please input the T:')
-    T = set([x for x in a.strip().split(' ')])
+    T = set([x for x in re.split('\s+',a.strip())])
 
     P = []
     left = ''
@@ -310,6 +318,12 @@ def analysis():
 			print 'sorry for ERROR!'
 			return
 
+'''
+V T 输入以空格分隔
+产生式输入各项之间空格分隔，空表示结束
+需要分析的语句以 # 结束
+参见 test.txt
+'''
 if __name__ == "__main__":
 	getGrammar()
 	print 'Product:'
