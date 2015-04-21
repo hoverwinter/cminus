@@ -243,6 +243,8 @@ def makeTable():
 			for prod in item:
 				if prod.lookahead == '#' and prod.left == S:
 					row['#'] = 'acc'
+				elif prod.lookahead == '#':
+					row['#'] = 'R'+str(product_index(prod))
 				else:
 					row['#'] = 'err'
 				if prod.lookahead == tmp:
@@ -263,6 +265,47 @@ def makeTable():
 		print row
 	return table
 
+def analysis():
+	sentence = raw_input('Sentence to analysis:')
+	print sentence
+
+	table = makeTable()
+	state = []
+	vt = []
+	state.append(0)
+	vt.append('#')
+	a = 0
+
+	while True:
+		s = state[-1]
+		w = vt[-1]
+		i = sentence[a]
+		if table[s][i].find('S') != -1:
+			vt.append(i)
+			state.append(int(table[s][i][1]))
+			a += 1
+
+			print 'shifting:'
+
+		elif table[s][i].find('R') != -1:
+			tmp = int(table[s][i][1])
+			for i in range(len(P[tmp].right)):
+				state.pop()
+				vt.pop()
+
+			print 'reducing: '+ str(P[tmp])
+
+			vt.append(P[tmp].left)
+			state.append(table[state[-1]][P[tmp].left])
+		elif table[s][i] == 'acc':
+			print 'ACCEPT: analysis finished!'
+			return 
+		else:
+			print 'sorry for error!'
+			return
+
+		print 'State Stack: %s' % state
+		print 'Symbol Stack: %s' % vt
 
 if __name__ == "__main__":
 	getGrammar()
@@ -271,4 +314,4 @@ if __name__ == "__main__":
 		print i
 	print
  	showItemSetBranch()
-	makeTable()
+	analysis()
