@@ -10,6 +10,8 @@ HIT License
 '''
 
 import re
+import os
+import json
 
 V = None
 T = None
@@ -82,6 +84,14 @@ def getGrammar():
     a = raw_input('Please input the S:')
     S = a
 
+def prodNone(X):
+	if X not in V:
+		return False
+	for item in P:
+		if item.left == X and len(item.right) == 0:
+			return True
+	return False
+
 #
 #	@input: X in (V U T)*
 #	@return: set of first or None
@@ -94,10 +104,18 @@ def getFirst(X):
     else:
         for item in P:
             if X == item.left:
+            	if len(item.right) == 0:
+            		continue
                 if item.right[0] in T:
                     first.add(item.right[0])
-                else:
-                    first = first.union(getFirst(item.right[0]))
+                if item.right[0] in V and item.right[0] != X:
+                	first = first.union(getFirst(item.right[0]))
+                	# i = 0
+                	# while (i < len(item.right) - 1 and prodNone(item.right[i])):
+                	# 	first = first.union(getFirst(item.right[i+1]))
+                	# 	i = i + 1
+                	# if i ==  len(item.right):
+                	# 	first.add('ɛ')
     return first
 
 #
@@ -263,7 +281,7 @@ def makeTable():
 						row[tmp] = 'S'+str(closure_index(t,states))
 					else:
 						if row.get(tmp,None) == None:
-							row[tmp] = 'err'	
+							row[tmp] = 'err'
 		for tmp in V:
 			t = go(item,tmp)
 			if t == None:
@@ -280,14 +298,21 @@ def makeTable():
 def analysis():
 	sentence = raw_input('Sentence to analysis:')
 	print sentence
-
-	table = makeTable()
+	if os.path.exists('table.json'):
+		with open('table.json','r') as f:
+			table = json.load(f)
+	else:
+		table = makeTable()
+		with open('table.json','w') as f:
+			json.dump(table,f)
+	print table[1]["S"]
 	state = []
 	vt = []
 	state.append(0)
 	vt.append('#')
 	a = 0
-
+	sentence = sentence.strip().split(' ')
+	print sentence
 	while True:
 		s = state[-1]
 		w = vt[-1]
@@ -295,12 +320,13 @@ def analysis():
 
 		print 'State Stack: %s' % state
 		print 'Symbol Stack: %s' % vt
-		
+
 		if table[s][i].find('S') != -1:
 			vt.append(i)
 			state.append(int(table[s][i][1:]))
 			a += 1
 			print 'shifting:'
+			print a
 
 		elif table[s][i].find('R') != -1:
 			tmp = int(table[s][i][1:])
@@ -310,10 +336,10 @@ def analysis():
 			print 'reducing: '+ str(P[tmp])
 
 			vt.append(P[tmp].left)
-			state.append(table[state[-1]][P[tmp].left])
+			state.append(int(table[state[-1]][P[tmp].left]))
 		elif table[s][i] == 'acc':
 			print 'ACCEPT: analysis finished!'
-			return 
+			return
 		else:
 			print 'sorry for ERROR!'
 			return
@@ -327,8 +353,15 @@ V T 输入以空格分隔
 if __name__ == "__main__":
 	getGrammar()
 	print 'Product:'
-	for i in P:
-		print i
-	print
- 	showItemSetBranch()
+	# for i in P:
+	# 	print i
+	# print
+	# print V
+	# print T
+	# print 
+	# print
+	# for i in V:
+	# 	print i,"\t",getFirst(i)
+ 	# showItemSetBranch()
 	analysis()
+	# makeTable()

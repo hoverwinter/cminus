@@ -1,0 +1,85 @@
+decl funcs slct M1 o M2 S' inc stmts F asgn rel type E nums stmt S funtype T func N1 N2 N3 N4 decls N6 N5 expr fundecl ids iter funid fun fundecls op left
+>= || float printf != $ & ( scanf * , main < > function @ return == void else break while continue str zhi int <= xiao num id ! % for ) + - / if = && [ ] ++ { } 
+S' -> S
+S -> void main ( ) { decls stmts } 
+S -> fun S 
+fun -> fun fun 
+fun -> funtype  function id ( fundecls ) { decls stmts } 
+fundecls -> fundecls , fundecl 
+fundecls -> fundecl 
+fundecl -> type id 
+decls -> decls decl 
+decls -> decl 
+decl -> type ids @ 
+type -> float 
+type -> int 
+funtype -> float 
+funtype -> int 
+ids -> ids , N6 id 
+ids -> id 
+ids -> id [ num ] = { nums } 
+nums -> nums , num 
+nums -> num 
+nums -> xiao 
+nums -> zhi 
+stmts -> stmts stmt 
+stmts -> stmt 
+stmt -> return expr @
+stmt -> asgn @ 
+stmt -> iter 
+stmt -> slct 
+stmt -> { stmts } 
+stmt -> continue 
+stmt -> break 
+expr -> E 
+E -> E + T 
+E -> E - T 
+E -> T 
+T -> T * F 
+T -> T / F 
+T -> T % F
+T -> F 
+F -> ( E ) 
+F -> num 
+F -> xiao 
+F -> zhi 
+F -> id 
+F -> id [ expr ] 
+asgn -> left = expr 
+asgn -> left = funid ( funcs ) 
+funid -> id 
+funcs -> funcs , func 
+funcs -> func 
+func -> id 
+func -> num 
+left -> id
+left -> id [ expr ] 
+iter -> for ( asgn @ M1 rel @ N4 inc ) N2 stmt 
+iter -> while M1 ( rel ) M2 stmt 
+M1 -> $ 
+M2 -> $ 
+N1 -> $ 
+N2 -> $ 
+N3 -> $ 
+N4 -> $
+N5 -> $ 
+N6 -> $ 
+rel -> expr op expr 
+rel -> ! rel 
+rel -> rel o N3 rel 
+op -> < 
+op -> > 
+op -> <= 
+op -> >= 
+op -> == 
+op -> != 
+o -> && 
+o -> || 
+inc -> left ++ ;
+slct -> if ( rel ) M1 stmt N1 else M2 stmt 
+stmt -> printf ( str ) @ 
+stmt -> printf ( str , N5 ids ) @ 
+stmt -> scanf ( str , & id ) @ 
+
+S'
+void main ( ) { int id @ break } #

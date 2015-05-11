@@ -1,0 +1,2 @@
+decl funcs slct M1 o M2 S' inc stmts F asgn rel type E nums stmt S funtype T func N1 N2 N3 N4 decls N6 N5 expr fundecl ids iter funid fun fundecls op left 
+>= || float printf != $ & ( scanf * , main < > function @ return == void else break while continue str zhi int <= xiao num id ! % for ) + - / if = && [ ] ++ { } 
