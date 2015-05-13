@@ -44,7 +44,7 @@
 43(call,printf,3,)
 44(param,,,mean)
 45(param,,,temp)
-46(call,calculate,2,0)
+46(call,calc,2,0)
 47(f=,i,,)
 48(param,,,"sum: %d")
 49(param,,,i)

@@ -1,0 +1,13 @@
+[fun:0] main: params:0 vars:8 addr:3
+  [sym] credit int addr:36 values:[2, 2, 1, 2, 2, 3]
+  [sym] stu_number int addr:60 values:[]
+  [sym] mean int addr:64 values:[]
+  [sym] sum int addr:68 values:[]
+  [sym] temp int addr:72 values:[]
+  [sym] i int addr:76 values:[]
+  [sym] score int addr:12 values:[76, 82, 90, 86, 79, 62]
+  [sym] calc  addr:0 values:[]
+[fun:1] calc: params:2 vars:3 addr:0
+  [sym] a int addr:0 values:[]
+  [sym] b int addr:4 values:[]
+  [sym] k int addr:8 values:[]

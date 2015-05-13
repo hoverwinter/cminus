@@ -1110,6 +1110,8 @@ def parse():
 				wf.close()
 			if '-s' in sys.argv:
 				write_symbol()
+			if '-m' in sys.argv:
+				write_tuple()
 			print 'ACCEPT: syntax analysis and code generating finished!'
 			return
 		else:
@@ -1133,13 +1135,227 @@ def write_symbol():
 			if debug:
 				print item.symbol[j]
 
+code = []
+def gen_code():
+	global debug, mid
+	param = [] #函数调用的参数
+	label = [] #产生标号的位置列表
+	location = 0 #当前生产汇编语句的位置
+	start = {} #四元组到汇编代码的映射
+	fname = ""
+	for item in fourtuple:
+		if item['no1'] == '+':
+			start[item['order']]=location
+			code.append('mov eax,%s\n' % item['no2'])
+			location+=1
+			code.append('add eax,%s\n' % item['no3'])
+			location+=1
+			code.append('mov %s,eax\n' % item['no4'])
+			location+=1
+		if item['no1'] == '-':
+			start[item['order']]=location
+			code.append('mov eax,%s\n' % item['no2'])
+			location+=1
+			code.append('sub eax,%s\n' % item['no3'])
+			location+=1
+			code.append('mov %s,eax\n' % item['no4'])
+			location+=1
+		if item['no1'] == '*':
+			start[item['order']]=location
+			code.append('mov eax,%s\n' % item['no2'])
+			location+=1
+			code.append('mov ebx,%s\n' % item['no3'])
+			location+=1
+			code.append('mul ebx\n')
+			location+=1
+			code.append('mov %s,eax\n' % item['no4'])
+			location+=1
+		if item['no1'] == '/':
+			start[item['order']]=location
+			code.append('mov eax,%s\n' % item['no2'])
+			location+=1
+			code.append('mov ebx,%s\n' % item['no3'])
+			location+=1
+			code.append('div ebx\n')
+			location+=1
+			code.append('mov %s,eax\n' % item['no4'])
+			location+=1
+		if item['no1'] == '=':
+			start[item['order']]=location
+			code.append('mov eax,%s\n' % item['no2'])
+			location+=1
+			code.append('mov %s,eax\n' % item['no4'])
+			location+=1
+		if item['no1'] == '++':
+			start[item['order']]=location
+			code.append('inc %s\n' % item['no4'])
+			location+=1
+		if item['no1'] == 'j':
+			start[item['order']]=location
+			code.append('jmp %s\n' % item['no4'])
+			label.append([int(item['no4']),location])
+			location+=1
+		if item['no1'] == 'j>=':
+			start[item['order']]=location
+			code.append('cmp %s,%s\n' % (item['no2'],item['no3']))
+			location+=1
+			code.append('jge %s\n' % item['no4'])
+			label.append([int(item['no4']),location])
+			location+=1
+		if item['no1'] == 'j<':
+			start[item['order']]=location
+			code.append('cmp %s,%s\n' %(item['no2'],item['no3']))
+			location+=1
+			code.append('jl %s\n' % item['no4'])
+			label.append([int(item['no4']),location])
+			location+=1
+		if item['no1'] == 'param':
+			start[item['order']]=location
+			param.append('%s' % item['no4'])
+		if item['no1'] == 'call':
+			start[item['order']]=location
+			cmd = "invoke %s," % item['no2']
+			for res in param:
+				if item['no2'] == 'scanf' and res.find('"') == -1:
+					cmd = cmd+'offset %s,' % res
+				else:
+					cmd = cmd+'%s,' % res
+			cmd = cmd[:-1] + '\n'
+			if debug:
+				print cmd
+			param[:] = []
+			code.append(cmd)
+			location+=1
+		if item['no1'] == 'ret':
+			start[item['order']]=location
+			code.append('mov eax,%s\n' % item['no4'])
+			location+=1
+			code.append('ret\n')
+			location+=1
+		if item['no1'] == '=[]':
+			start[item['order']]=location
+			code.append('mov ecx,%s\n'%item['no3'])
+			location+=1
+			code.append('mov eax,%s[ecx]\n' % (item['no2']))
+			location+=1
+			code.append('mov %s,eax\n' %(item['no4']))
+			location+=1
+		if item['no1'] == 'f=':
+			start[item['order']]=location
+			code.append('mov %s,eax\n' % item['no2'])
+			location+=1
+
+	# 处理标号
+	for tmpl in label:
+		obj = start[tmpl[0]]
+		code[obj] = 'L%s:%s' %(obj+1,code[obj])
+		code[tmpl[1]] = code[tmpl[1]].split(' ')[0] + str(' L%s\n' % (obj+1))
+
+	funlist = {}
+	for i in range(symcount+1):
+		item = func_sym_tbl[i]
+		funlist[start[item.location]] = item.fun_name
+
+	# 处理 PROC 参数
+	for i in range(symcount+1):
+		item = func_sym_tbl[i]
+		gen = '%s PROC' % (item.fun_name)
+		if item.num_param == 0:
+			gen = "%s\n" %gen
+		else:
+			patmp = ""
+			for pa in range(item.num_param):
+				patmp = "%s, %s: dword" % (patmp,item.symbol[pa].name)
+			gen = "%s uses eax ebx %s\n" % (gen,patmp)
+
+		code.insert(start[item.location],gen)
+
+	proc = {}
+	#存储函数名
+	fnamelist = []
+	for i in range(len(code)):
+		if code[i].find('PROC') != -1:
+			if fname != "":
+				proc[i] = '%s ENDP\n' % fname
+			fname = code[i].split(' ')[0]
+			fnamelist.append(fname)
+
+	for (k,v) in proc.items():
+		code.insert(k,v)
+	code.append('main ENDP\n')
+	code.append('END main\n')
+	# 处理完代码段
+	code.insert(0,'.code\n')
+
+	
+	for tmp in range(mid):
+		code.insert(0,'t%d dword ?\n' % tmp)
+	for i in range(symcount+1):
+		item = func_sym_tbl[i]
+		#去掉参数 range中
+		for j in range(item.num_param,item.length):
+			if item.symbol[j].variety:
+				gen = ""
+				for k in item.symbol[j].number:
+					gen = "%s,%s" % (gen,k)
+				code.insert(0,'%s dword %s\n' % (item.symbol[j].name,gen[1:]))
+			else:
+				#符号表中的函数名 不能生成参数
+				if item.symbol[j].name in fnamelist:
+					continue
+				code.insert(0,'%s dword ?\n' % item.symbol[j].name)
+
+	fmtnum = 0
+	fmtmsg = []
+	for i in range(len(code)):
+		if code[i].find('printf') != -1 or code[i].find('scanf')!= -1:
+			fmt = code[i].strip().split(',')[1]
+			if code[i].find('printf') != -1 and fmt.find(r'\n') != -1:
+				fmtmsg.append('fmt%d byte %s,0dh,0ah,0\n' %(fmtnum,fmt.replace(r'\n','')))
+			else:
+				fmtmsg.append('fmt%d byte %s,0\n' %(fmtnum,fmt))
+			code[i] = code[i].replace(fmt,'offset fmt%d ' % fmtnum)
+			fmtnum+=1
+
+	for tmp in fmtmsg:
+		code.insert(0,tmp)
+
+	# 数据段处理完毕
+	code.insert(0,'.data\n')
+
+	# 添加引用信息
+	code.insert(0,'\n')
+	code.insert(0,'printf PROTO C,:PTR BYTE,: VARARG\n')
+	code.insert(0,'scanf PROTO C,: PTR BYTE,: VARARG\n')
+	code.insert(0,'\n')
+	code.insert(0,'INCLUDELIB KERNEL32.LIB\n')
+	code.insert(0,'INCLUDELIB MSVCRT.LIB\n')
+	code.insert(0,'\n')
+	code.insert(0,'option casemap:none\n')
+	code.insert(0,'.STACK 4096\n')
+	code.insert(0,'.MODEL FLAT,STDCALL\n')
+	code.insert(0,'.686P\n')
+	code.insert(0,'\n')
+	code.insert(0,'TITLE hoverwinter@gmail.com 2015\n')
+
+	if debug:
+		print start
+		print label
+		print fnamelist
+	wf = open('result.asm','w')
+	for tmp in code:
+		wf.write(tmp)
+	wf.close()
+
+
 def usage():
 	print '''%s [-d] [-t] [-l] [-s] srcfile
 output four tuple in [result.txt]
 -d : output debug information
 -t : save tokens in file [token.txt]
 -l : save parse processing in file [log.txt]
--s : save symbol table in file [symbol.txt]''' % sys.argv[0]
+-s : save symbol table in file [symbol.txt]
+-m : save four-tuples in file [result.txt]''' % sys.argv[0]
 
 if __name__ == "__main__":
 	if 2<= len(sys.argv) <=6:
@@ -1147,11 +1363,6 @@ if __name__ == "__main__":
 		if '-t' in sys.argv:
 			write_token()
 		parse()
-		write_tuple()
+		gen_code()
 	else:
 		usage()
-
-
-
-
-

@@ -1,4 +1,4 @@
-int function calculate(int a,int b)
+int function calc(int a,int b)
 {
     int k;
     k=a+b;
@@ -35,7 +35,7 @@ void main()
         mean = 60 - mean;
         printf("the score of student number %d is %d lower than 60.\n",stu_number, mean);
     }
-   i=calculate(mean,temp);
+   i=calc(mean,temp);
    printf("sum: %d",i);
     return 0;
 }
